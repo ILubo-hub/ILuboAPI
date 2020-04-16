@@ -4,9 +4,16 @@ namespace App\Http\Controllers;
 
 use App\user;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth as JWTAuth;
 
 class UserController extends Controller
 {
+    public function __construct(){
+        $this->middleware('jwt.auth', [
+            'except' => ['index']
+        ]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +21,19 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        try{
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['msg' => 'User not found'], 404);
+            }
+            $users = User::orderBy('id', 'asc')->with(['rooms', 'user_type'])->get();
+            $response = [
+                'msg' => 'List of all users with rooms and user_type',
+                'data' => $users
+            ];
+            return response()->json($response, 200);
+        }catch(\Exception $e){
+            return response()->json(utf8_encode($e->getMessage()), 422);
+        }
     }
 
     /**
