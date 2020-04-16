@@ -11,6 +11,10 @@ class User_typeTableSeeder extends Seeder
      */
     public function run()
     {
-        //
+        //Main
+        $user_type = new App\user_type([
+            'description' => "Main"
+        ]);
+        $user_type->save();
     }
 }
